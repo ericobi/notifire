@@ -12,8 +12,24 @@ export class MatrixSmsProvider implements ISmsProvider {
   channelType = ChannelTypeEnum.SMS as ChannelTypeEnum.SMS;
   private matrixClient: Matrix.MatrixClient;
 
-  constructor(config: { opts: Matrix.ICreateClientOpts | string }) {
+  constructor(private config: { opts: Matrix.ICreateClientOpts | string }) {
     this.matrixClient = Matrix.createClient(config.opts);
+  }
+
+  async connect(options?: Matrix.IRoomDirectoryOptions): Promise<void> {
+    await this.matrixClient.publicRooms(options);
+    await this.matrixClient.startClient({ initialSyncLimit: 10 });
+    await new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.matrixClient.once('sync', function (state, _prevState, result) {
+        if (state === 'PREPARED') {
+          resolve(result);
+        } else {
+          reject(state);
+        }
+      });
+    });
   }
 
   async sendMessage(
