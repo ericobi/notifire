@@ -1,4 +1,3 @@
-import { ProviderStore } from '@novu/node/build/main/lib/provider/provider.store';
 import { MatrixSmsProvider } from './matrix.provider';
 
 test('should trigger Twilio correctly', async () => {
